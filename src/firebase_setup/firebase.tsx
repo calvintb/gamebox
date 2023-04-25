@@ -58,7 +58,6 @@ export const createAccount = (email:string, password:string, username:string) =>
       const userRef = collection(firestore, 'users')
       await setDoc(doc(userRef, user), {
         username: username, email: email});
-
     }
 
     export const getUser = async () => {  

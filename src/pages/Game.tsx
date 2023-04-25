@@ -4,6 +4,7 @@ import { auth, getUser } from "../firebase_setup/firebase";
 
 
 export const Game = () => {
+    
 
     const authObserver = auth.onAuthStateChanged((user) => {
     if (user) {
