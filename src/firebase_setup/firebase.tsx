@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "@firebase/firestore"
+import { getFirestore, collection, where, getDocs, getDoc, setDoc, doc } from "@firebase/firestore"
 import { getAuth, createUserWithEmailAndPassword, User, signInWithEmailAndPassword } from "firebase/auth";
+import { getDatabase, ref, child, get, set, query} from "firebase/database";
 
 
 
@@ -17,14 +18,17 @@ export const app = initializeApp(firebaseConfig);
 export const firestore = getFirestore(app)
 export const auth = getAuth(app);
 
-export const createAccount = (email:string, password:string) => {createUserWithEmailAndPassword(auth, email, password)
+export const createAccount = (email:string, password:string, username:string) => {createUserWithEmailAndPassword(auth, email, password)
   .then((userCredential) => {
     // Signed in 
     type authUser = User & {
       accessToken: string,
     }
     const user = userCredential.user as authUser;
-    if (user && user.accessToken) window.localStorage.setItem("token", user.accessToken);
+    if (user && user.accessToken) {
+      window.localStorage.setItem("token", user.accessToken)
+      setUser(email, username)
+    };
     // ...
   })
   .catch((error) => {
@@ -48,3 +52,36 @@ export const createAccount = (email:string, password:string) => {createUserWithE
       const errorMessage = error.message;
       // ..
     });}
+
+    export const setUser = async (email:string, username:string) => {
+      const user = auth.currentUser?.uid
+      const userRef = collection(firestore, 'users')
+      await setDoc(doc(userRef, user), {
+        username: username, email: email});
+
+    }
+
+    export const getUser = async () => {  
+      const user = auth.currentUser?.uid
+
+      const docRef = doc(firestore, "users", `${user}`);
+      const docSnap = await getDoc(docRef);
+      
+
+      const querySnapshot = await getDocs(collection(firestore, "users"));
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, " => ", doc.data());
+      });
+
+      if (docSnap.exists()) {
+        console.log("Document data:", docSnap.data());
+      } else {
+        // docSnap.data() will be undefined in this case
+        console.log("No such document!");
+      }
+    }
+
+    
+
+  
