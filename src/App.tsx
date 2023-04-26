@@ -3,6 +3,7 @@ import { Home } from './pages/Home'
 import { SignUp } from './pages/SignUp'
 import { Game } from './pages/Game'
 import { Login } from './pages/Login'
+import { Spring } from './pages/Spring'
 
 const router = createBrowserRouter([{
   path: "/",
@@ -16,6 +17,9 @@ const router = createBrowserRouter([{
 }, {
   path: "/login",
   element: <Login />
+}, {
+  path: "/spring",
+  element: <Spring />
 }
 ])
 
