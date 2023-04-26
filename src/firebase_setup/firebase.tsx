@@ -3,6 +3,10 @@ import { getFirestore, collection, where, getDocs, getDoc, setDoc, doc } from "@
 import { getAuth, createUserWithEmailAndPassword, User, signInWithEmailAndPassword } from "firebase/auth";
 import { getDatabase, ref, child, get, set, query} from "firebase/database";
 
+type gameUser = {
+  name: string,
+  id: string
+}
 
 
 const firebaseConfig = {
@@ -11,11 +15,13 @@ const firebaseConfig = {
     projectId: "gamebox-49a20",
     storageBucket: "gamebox-49a20.appspot.com",
     messagingSenderId: "642607547473",
-    appId: "1:642607547473:web:489525b258e92f3837a470"
-  };
+    appId: "1:642607547473:web:489525b258e92f3837a470",
+    databaseURL: "https://gamebox-49a20-default-rtdb.firebaseio.com/",
+    };
 
 export const app = initializeApp(firebaseConfig);
 export const firestore = getFirestore(app)
+export const database = getDatabase(app);
 export const auth = getAuth(app);
 
 export const createAccount = (email:string, password:string, username:string) => {createUserWithEmailAndPassword(auth, email, password)
@@ -27,7 +33,6 @@ export const createAccount = (email:string, password:string, username:string) =>
     const user = userCredential.user as authUser;
     if (user && user.accessToken) {
       window.localStorage.setItem("token", user.accessToken)
-      setUser(email, username)
     };
     // ...
   })
@@ -53,34 +58,20 @@ export const createAccount = (email:string, password:string, username:string) =>
       // ..
     });}
 
-    export const setUser = async (email:string, username:string) => {
-      const user = auth.currentUser?.uid
-      const userRef = collection(firestore, 'users')
-      await setDoc(doc(userRef, user), {
-        username: username, email: email});
+
+    // add geolocation prop too
+    export function writeUserData(username:string) {
+      const userId = auth.currentUser?.uid
+      const db = getDatabase();
+      set(ref(db, 'users/' + userId), {
+        username: username,
+      });
     }
-
-    export const getUser = async () => {  
-      const user = auth.currentUser?.uid
-
-      const docRef = doc(firestore, "users", `${user}`);
-      const docSnap = await getDoc(docRef);
+    
+    export function retrieveUser() {
+      // Get a database reference to our posts
       
 
-      const querySnapshot = await getDocs(collection(firestore, "users"));
-      querySnapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        console.log(doc.id, " => ", doc.data());
-      });
-
-      if (docSnap.exists()) {
-        console.log("Document data:", docSnap.data());
-      } else {
-        // docSnap.data() will be undefined in this case
-        console.log("No such document!");
-      }
     }
-
-    
 
   
