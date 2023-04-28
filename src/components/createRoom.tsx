@@ -16,15 +16,12 @@ export const CreateRoom = () => {
           host: host
         };
         push(roomRef, room);
-
-        navigate("/game")
-
     }
     return (
         <div>
             <input placeholder="roomcode..." value={roomCode} onChange={(e) => setRoomCode(e.target.value)}></input>
             <input placeholder="player name..." value={host} onChange={(e) => setHost(e.target.value)}></input>
-            <button onClick={() => createRoom()}>Host</button>
+            <button onClick={() => {createRoom();}}>Host</button>
         </div>
     )
 }

@@ -2,7 +2,7 @@ import { Question } from "../components/Question"
 // import { PlayerCard } from "../components/player_card"
 import { Timer } from "../components/Timer";
 import { Children, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { auth, database } from "../firebase_setup/firebase";
 import { get, getDatabase, onValue, orderByChild, query, ref } from "firebase/database";
 
@@ -19,52 +19,32 @@ type gameUser = {
 
 export const Game = () => {
     const [data, setData] = useState();
-    const [users, setUsers] = useState<User[]>([]);
+    const [users, setUsers] = useState<gameUser[]>([]);
     const [timer, setTimer] = useState("05");
     const [response, setResponse] = useState("");
     const [user, setMyUser] = useState<gameUser>()
 
     const navigate = useNavigate();
 
+    const {state} = useLocation();
+    const roomId = state.roomId;
+
     useEffect(() => {
-        const todoRef = ref(database, `/rooms/-NTy9iXrTbiAlnOMgmp1/users`);
+        const userRef = ref(database, `/rooms/${roomId}/users`);
         
-        onValue(todoRef, (snapshot) => {
-          const todos = snapshot.val();
-          const newTodoList: Todo[] = [];
+        onValue(userRef, (snapshot) => {
+          const users = snapshot.val();
+          const newUserList: gameUser[] = [];
     
-          for (let id in todos) {
-            newTodoList.push({ id, ...todos[id] });
+          for (let id in users) {
+            newUserList.push({ id, ...users[id] });
           };
+          console.log(newUserList)
     
-          setTodoList(newTodoList);
+          setUsers(newUserList);
         });
-      }, [db]);
-    
-    
+      }, [database]);
 
-    useEffect(() => {
-        const userRef = ref(database, `/rooms/-NTy9iXrTbiAlnOMgmp1/users`);
-        const userQuery = query(userRef, orderByChild('username'));
-        console.log(userRef)
-        const listener = onValue(userQuery, (snapshot) => {
-            setData(snapshot.val())
-        });
-        
-        return () => {
-          listener(); // Clean up the listener when the component unmounts
-        };
-      }, []);
-
-    
-    function connect () {
-        if(data) {
-            const keys = Object.keys(data)
-            for (var k in keys) {
-                console.log(k)
-            }
-        }    
-    }
 
     return (
         <>        
@@ -78,11 +58,11 @@ export const Game = () => {
             <input type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
             <button>SUBMIT RESPONSE</button>
             <Timer timer={timer} update={setTimer}/>
-            <button onClick={() => connect()}>START GAME</button>
+            <button onClick={() => {}}>START GAME</button>
             <div>
                 <h1>USERS</h1>
                 {users.map((user, index) => {
-                    return <p key={index}>HI</p>;
+                    return <p key={index}>{user.username}</p>;
                 })}
             </div>
         </>
