@@ -67,3 +67,29 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+
+
+.player-card-title {
+  background-color: lightgreen;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.player-card-main {
+  background-color: lightgray;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.player-card-label {
+  font-weight: bold;
+  font-size: 18px;
+  color: #333;
+  text-transform: uppercase;
+  margin-right: 16px;
+}
