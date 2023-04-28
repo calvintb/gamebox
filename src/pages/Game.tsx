@@ -1,9 +1,7 @@
-import { useState, useEffect, useDebugValue } from "react"
+import { useState, useEffect } from "react"
 import { Question } from "../components/Question"
 import { PlayerCard } from "../components/PlayerCard"
 import { Timer } from "../components/Timer";
-import { TwitterAuthProvider } from "firebase/auth";
-import { firestore } from "../firebase_setup/firebase";
 
 type User = {
     id: string;
@@ -68,7 +66,7 @@ export const Game = () => {
             <button>START GAME</button>
             </>
             
-            
+
             <div className='player-card-label'>
                 {locationData ? ( 
                     <PlayerCard name='namegoesHERE' geolocation={`${locationData.city}, ${locationData.principalSubdivision}, ${locationData.countryCode}`} />
