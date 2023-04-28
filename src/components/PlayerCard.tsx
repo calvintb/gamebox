@@ -1,8 +1,3 @@
-
-// ALL THIS BELOW IS FROM 'FirstReactApp' FormInput component
-
-import { ReactNode } from "react";
-
 interface PlayerCardProps {
   name: string;
   geolocation: string;
