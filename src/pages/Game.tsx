@@ -66,22 +66,19 @@ export const Game = () => {
             <button>START GAME</button>
             </>
             
+
             <div className='player-card-label'>
-                <PlayerCard name='namegoeshere' geolocation={String(locationLoaded)}/>
-                {/* <PlayerCard name='namegoeshere' geolocation={String(locationData.city)}/>  null error */}
-                <PlayerCard name="John Doe" geolocation="New York" />
+                {locationData ? ( 
+                    <PlayerCard name='namegoesHERE' geolocation={`${locationData.city}, ${locationData.principalSubdivision}, ${locationData.countryCode}`} />
+                ) : (
+                    <PlayerCard name='namegoesHERE' geolocation='Loading...' />
+                )}
+
                 My location is: {locationLoaded ? (`Lat: ${lat}, Lon: ${lon}`) : 'Loading...'}
+                {/* <p>{locationData.city}, {locationData.principalSubdivision}, {locationData.countryCode}</p> */}
             </div>
             
-            <div>
-                {locationData && (
-                    <div>
-                    <p>{locationData.city}, {locationData.principalSubdivision}, {locationData.countryCode}</p> 
-                    {/* I need to put a check on the above line of code if a state isnt present  */}
-                    {/* And also it is loading null sometimes. I think i need a wait on my fetch or something...? */}
-                    </div>
-                )}
-            </div>
+            
 
         </main>
 
