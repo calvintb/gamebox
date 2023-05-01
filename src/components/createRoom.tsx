@@ -52,8 +52,9 @@ export const CreateRoom = () => {
         };
         const result = await push(roomRef, room);
         onValue(result, (snapshot)=> {
+            const keys = Object.keys(snapshot.val())
             const data = snapshot.val()
-            navigate('/game', {state: {roomId:data.id}})
+            navigate('/game', {state: {roomId: keys[0]}})
         })
     }
     return (
