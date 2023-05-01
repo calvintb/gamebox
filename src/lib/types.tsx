@@ -10,3 +10,8 @@ export type Location = {
     principalSubdivision: string,
     countryCode: string
 }
+
+export type Room = {
+    host: string,
+    roomCode: string
+}

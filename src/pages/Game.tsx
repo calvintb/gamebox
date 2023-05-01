@@ -4,13 +4,12 @@ import { PlayerCard } from "../components/PlayerCard"
 import { Timer } from "../components/Timer";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth, database } from "../firebase_setup/firebase";
-import { get, getDatabase, onValue, orderByChild, query, ref } from "firebase/database";
-import {User} from "../lib/types"
+import { equalTo, get, getDatabase, onValue, orderByChild, orderByKey, query, ref } from "firebase/database";
+import {User, Room} from "../lib/types"
 
 export const Game = () => {
     const [data, setData] = useState();
-    // const [users, setUsers] = useState<gameUser[]>([]);
-
+    const [room, setRoom] = useState<Room>();
     const [users, setUsers] = useState<User[]>([]);
     const [timer, setTimer] = useState("05");
     const [response, setResponse] = useState("");
@@ -20,8 +19,15 @@ export const Game = () => {
     const {state} = useLocation();
     const roomId = state.roomId;
 
+
     useEffect(() => {
         const userRef = ref(database, `/rooms/${roomId}/users`);
+        const roomRef = ref(database, `/rooms/${roomId}`)
+
+        onValue(roomRef, (snapshot) => {
+          const newRoom: Room = snapshot.val()
+          setRoom(newRoom)
+        })
         
         onValue(userRef, (snapshot) => {
           const users = snapshot.val();
@@ -30,7 +36,6 @@ export const Game = () => {
           for (let id in users) {
             newUserList.push({ id, ...users[id] });
           };
-          console.log(newUserList)
     
           setUsers(newUserList);
         });
@@ -39,7 +44,13 @@ export const Game = () => {
 
     return(
       <main>
-        <>        
+        <>
+        {room &&
+          <>
+            <h1>ROOM CODE: {room.roomCode}</h1>
+            <h2>HOST: {room.host}</h2> 
+          </>
+        }       
         <Question prompt={"What food should you not bring to a potluck."}/>
         
         <input type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
@@ -49,15 +60,11 @@ export const Game = () => {
         </>
         
 
-
-        <div>
-          {users.map((user) => {
-          return <PlayerCard key={user.id} name={user.name} geolocation={user.location}/>
+        <div className=".player-card-label">
+          {users.map((user, index) => {
+          return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location}/>
           })}
         </div>
-       
-  
-          
           
 
       </main>

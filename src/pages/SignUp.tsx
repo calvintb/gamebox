@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { auth, createAccount, database } from "../firebase_setup/firebase";
 import { useNavigate } from "react-router-dom";
-import { equalTo, get, onValue, orderByChild, orderByKey, push, query, ref } from "firebase/database";
+import { equalTo, get, onValue, orderByChild, orderByKey, push, query, ref, set } from "firebase/database";
 import { Location, User } from "../lib/types";
 
 export const SignUp = () => {
@@ -10,8 +10,13 @@ export const SignUp = () => {
     const [password, setPassword] = useState("");
     const [roomId, setRoomId] = useState("");
     const [username, setUsername] = useState("");
+    const [nameTaken, setNameTaken] = useState(false);
+    const [createdUser, setCreatedUser] = useState(false);
+    const [error, setError] = useState("");
     const [lat, setLat] = useState(0);
     const [lon, setLon] = useState(0);
+    const [locationLoaded, setLocationLoaded] = useState(false);
+    const [locationData, setLocationData] = useState<Location>();
 
     const [authenticated, setAuthenticated] = useState(false)
     const navigate = useNavigate();
@@ -22,29 +27,59 @@ export const SignUp = () => {
         const roomQuery = query(roomRef, orderByChild('roomCode'), equalTo(password));
         
         const listener = onValue(roomQuery, (snapshot) => {
-          setData(snapshot.val());
+            setError("")
+            if (snapshot.val()){
+                const keys = Object.keys(snapshot.val())
+                setRoomId(keys[0])
+            }
+            
+            setData(snapshot.val());
         });
         
         return () => {
           listener(); // Clean up the listener when the component unmounts
         };
       }, [password]);
+
+    useEffect(() => {
+        const roomRef = ref(database, `rooms/${roomId}/users`);
+        const roomQuery = query(roomRef, orderByChild('name'), equalTo(username));
+        
+        const listener = onValue(roomQuery, (snapshot) => {
+            if(!snapshot.val()) {
+                setNameTaken(false)
+            }else {
+                setNameTaken(true)
+            }
+        });
+        
+        return () => {
+            listener(); // Clean up the listener when the component unmounts
+        };
+    }, [roomId, username]);
     
 
     //  where we would include geolocation as well
     const addUser = async () => { 
-        if(data && locationData) {
+        if (!data) {
+            setError("No Room Found!")
+            return
+        }
+        if (nameTaken) {
+            setError("Username Already In Use!")
+            return
+        }
+
+        if(data && locationData && roomId && !nameTaken) {
             console.log(locationData.city)
-            const keys = Object.keys(data)
-            setRoomId(keys[0])
-            const userRef = ref(database, `/rooms/${keys[0]}/users`);
-            const user: User = {
+            setCreatedUser(true)
+            set(ref(database, `/rooms/${roomId}/users/` + username), {
                 name: username,
                 id: auth.currentUser?.uid ? auth.currentUser?.uid : "null",
                 location: `${locationData.city}, ${locationData.principalSubdivision} ${locationData.countryCode}`,
-                response: ""
-            };
-            const blah = await push(userRef, user); 
+                response: "" 
+            });
+            
         }    
         return       
     };
@@ -62,11 +97,11 @@ export const SignUp = () => {
     // }, []);
 
     useEffect(() => {
-        if(roomId) {
+        if(createdUser) {
             navigate('/game', {state: {roomId: roomId}})
         }
         return
-    }, [roomId])
+    }, [createdUser])
 
 
     useEffect(() => {
@@ -96,10 +131,6 @@ export const SignUp = () => {
     }, [lat, lon])
 
 
-
-    const [locationLoaded, setLocationLoaded] = useState(false);
-    const [locationData, setLocationData] = useState<Location>();
-
     useEffect(() => {
         const watch = navigator.geolocation.watchPosition((location) => {
             setLat(location.coords.latitude);
@@ -124,6 +155,7 @@ export const SignUp = () => {
                 <input value={password} onChange={(e)=>setPassword(e.target.value)}/>
                 <input value={username} onChange={(e)=>setUsername(e.target.value)}/>
                 <button onClick={() => {}}type="submit">Sign Up</button>
+                <p>{error}</p>
             </form>
             
         </div>
