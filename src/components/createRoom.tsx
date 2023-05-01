@@ -28,7 +28,7 @@ export const CreateRoom = () => {
         const roomQuery = query(roomRef, orderByChild('roomCode'), equalTo(code));
         
         const listener = onValue(roomQuery, (snapshot) => {
-            // in the super unlikly chance the code is the same as one that exists, generate a new one
+        // in the super unlikly chance the code is the same as one that exists, generate a new one
           if (!snapshot.val()) {
             setRoomCode(code)
           }
@@ -52,9 +52,7 @@ export const CreateRoom = () => {
         };
         const result = await push(roomRef, room);
         onValue(result, (snapshot)=> {
-            const keys = Object.keys(snapshot.val())
-            const data = snapshot.val()
-            navigate('/game', {state: {roomId: keys[0]}})
+            navigate('/game', {state: {roomId:result.key}})
         })
     }
     return (

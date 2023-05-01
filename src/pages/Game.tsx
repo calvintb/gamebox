@@ -22,12 +22,8 @@ export const Game = () => {
 
     useEffect(() => {
         const userRef = ref(database, `/rooms/${roomId}/users`);
-        const roomRef = ref(database, `/rooms/${roomId}`)
 
-        onValue(roomRef, (snapshot) => {
-          const newRoom: Room = snapshot.val()
-          setRoom(newRoom)
-        })
+        
         
         onValue(userRef, (snapshot) => {
           const users = snapshot.val();
@@ -40,6 +36,15 @@ export const Game = () => {
           setUsers(newUserList);
         });
     }, [database]);
+
+    useEffect(() => {
+      const roomRef = ref(database, `/rooms/${roomId}`)
+      onValue(roomRef, (snapshot) => {
+        const newRoom: Room = snapshot.val()
+        setRoom(newRoom)
+      })
+
+    }, [])
 
 
     return(
