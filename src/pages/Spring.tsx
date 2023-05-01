@@ -6,54 +6,29 @@ export const Spring = () => {
 
     const [reverse, setReverse] = useState(false);
 
-    // const getFrom = () => {
-    //     if (reverse) {
-    //         return {
-    //             x: 1000 ,
-                
-    //           }
-    //     }
-      
-    //     if (!reverse) {
-    //       return {
-    //         x: 0 ,
-    //       }
-    //     }   
-    //     setReverse(!reverse)
-    // }
-
-    // const getTo = () => {
-    //     if (reverse) {
-    //         return {
-    //             x: 0 ,
-    //         }
-    //     }
-      
-    //     if (!reverse) {
-    //         return {
-    //             x: 1000 ,
-    //         }
-    //     }   
-    // }
 
     const [springs, api] = useSpring(() => ({     
-        from: {x: reverse? 0: 1000},
-        to: { x: reverse? 1000: 0},
-        //reset: true,
+        from: { x: 1500, rotate: 0},
+        to: { x: -100, rotate: 1000},
         loop: true,
-        onStart: setReverse(!reverse),
-        onResolve: setReverse(!reverse),
-        config: {duration: 1000},
+        config: {duration: 10000},
       }))
     
-  
-    
-    // const [styles, api] = useSpring(() => ({ x: 0 }))
 
-    // api.start({
-    // x: 1,
-    // })
-    
+    const [springs2, api2] = useSpring(() => ({     
+        from: { x: 1500, rotate: 1000},
+        to: { x: -100, rotate: 0},
+        loop: true,
+        config: {duration: 10000},
+    }))
+
+    const [springs3, api3] = useSpring(() => ({     
+        from: { x: 1550, },
+        to: { x: -200, },
+        loop: true,
+        config: {duration: 10000},
+    }))
+
 
     // const handleClick = () => {
     //     if(reverse){
@@ -83,6 +58,16 @@ export const Spring = () => {
         <animated.div
         //onClick={handleClick}
         style={{
+          width: 100,
+          height: 100,
+          background: 'blue',
+          borderRadius: 8,
+          ...springs2,
+        }}
+      />
+        <animated.div
+        //onClick={handleClick}
+        style={{
           width: 80,
           height: 80,
           background: '#ff6d6d',
@@ -93,13 +78,18 @@ export const Spring = () => {
       <animated.div
         //onClick={handleClick}
         style={{
-          width: 80,
-          height: 80,
+          width: 50,
+          height: 50,
           background: 'green',
           borderRadius: 8,
-          ...springs,
+          ...springs2,
         }}
       />
+      <animated.h1
+        style={{
+            ...springs3
+        }}
+      >Loading</animated.h1>
       </div>
     )
 }
