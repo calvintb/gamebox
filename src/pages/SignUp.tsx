@@ -138,6 +138,12 @@ export const SignUp = () => {
             setLocationLoaded(true);
         }, (err) => {
           console.log(err)
+          const tempLocation: Location = {
+            city: "Game",
+            principalSubdivision: "Box",
+            countryCode: "Location"
+          }
+          setLocationData(tempLocation)
         }, {
           enableHighAccuracy: true,
         })
