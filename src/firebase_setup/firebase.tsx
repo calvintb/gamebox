@@ -3,12 +3,6 @@ import { getFirestore, collection, where, getDocs, getDoc, setDoc, doc } from "@
 import { getAuth, createUserWithEmailAndPassword, User, signInWithEmailAndPassword } from "firebase/auth";
 import { getDatabase, ref, child, get, set, query} from "firebase/database";
 
-type gameUser = {
-  name: string,
-  id: string
-}
-
-
 const firebaseConfig = {
     apiKey: "AIzaSyCxkEpY6LJ9FbYzES_U1PwspMUvYpKXAhE",
     authDomain: "gamebox-49a20.firebaseapp.com",
@@ -59,12 +53,5 @@ export const createAccount = (email:string, password:string, username:string) =>
       // ..
     });}
 
-
-    
-    export function retrieveUser() {
-      // Get a database reference to our posts
-      
-
-    }
 
   

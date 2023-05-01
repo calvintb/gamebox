@@ -2,13 +2,7 @@ import { useEffect, useState } from "react"
 import { auth, createAccount, database } from "../firebase_setup/firebase";
 import { useNavigate } from "react-router-dom";
 import { equalTo, get, onValue, orderByChild, orderByKey, push, query, ref } from "firebase/database";
-
-type gameUser = {
-    username: string,
-    id: string,
-    location: string,
-    response: string
-  }
+import { Location, User } from "../lib/types";
 
 export const SignUp = () => {
     const [data, setData] = useState();
@@ -16,8 +10,10 @@ export const SignUp = () => {
     const [password, setPassword] = useState("");
     const [roomId, setRoomId] = useState("");
     const [username, setUsername] = useState("");
+    const [lat, setLat] = useState(0);
+    const [lon, setLon] = useState(0);
+
     const [authenticated, setAuthenticated] = useState(false)
-    const [createPlayer, setCreatePlayer] = useState(false)
     const navigate = useNavigate();
 
     
@@ -35,16 +31,17 @@ export const SignUp = () => {
       }, [password]);
     
 
-    //   where we would include geolocation as well
+    //  where we would include geolocation as well
     const addUser = async () => { 
-        if(data) {
+        if(data && locationData) {
+            console.log(locationData.city)
             const keys = Object.keys(data)
             setRoomId(keys[0])
             const userRef = ref(database, `/rooms/${keys[0]}/users`);
-            const user = {
-                username,
-                id: auth.currentUser?.uid,
-                location: "",
+            const user: User = {
+                name: username,
+                id: auth.currentUser?.uid ? auth.currentUser?.uid : "null",
+                location: `${locationData.city}, ${locationData.principalSubdivision} ${locationData.countryCode}`,
                 response: ""
             };
             const blah = await push(userRef, user); 
@@ -52,17 +49,17 @@ export const SignUp = () => {
         return       
     };
 
-    useEffect(()=>{
-        const authObserver = auth.onAuthStateChanged((user) => {
-            if (user && !authenticated && username) {
-                setAuthenticated(true)
-            }
-        })
-        return () => {
-            authObserver();
-        }
+    // useEffect(()=>{
+    //     const authObserver = auth.onAuthStateChanged((user) => {
+    //         if (user && !authenticated && username) {
+    //             setAuthenticated(true)
+    //         }
+    //     })
+    //     return () => {
+    //         authObserver();
+    //     }
         
-    }, []);
+    // }, []);
 
     useEffect(() => {
         if(roomId) {
@@ -70,6 +67,54 @@ export const SignUp = () => {
         }
         return
     }, [roomId])
+
+
+    useEffect(() => {
+        const fetchAPI = async () => {
+            const url = 'https://api-bdc.net/data/reverse-geocode';
+            const latitude = lat;
+            const longitude = lon;
+            const localityLanguage = 'en';
+            const apiKey = 'bdc_df38e981116f4f8781389060be80ad53';
+      
+            const response = await fetch(`${url}?latitude=${latitude}&longitude=${longitude}&localityLanguage=${localityLanguage}&key=${apiKey}`);
+      
+            if (response.ok) {
+              const jsonData = await response.json();
+              setLocationData(jsonData as Location);
+              console.log(jsonData)
+            } else {
+              console.error(`HTTP error! status: ${response.status}`);
+            }
+          };
+
+          if( lat && lon) {
+            fetchAPI();
+          }
+
+        return
+    }, [lat, lon])
+
+
+
+    const [locationLoaded, setLocationLoaded] = useState(false);
+    const [locationData, setLocationData] = useState<Location>();
+
+    useEffect(() => {
+        const watch = navigator.geolocation.watchPosition((location) => {
+            setLat(location.coords.latitude);
+            setLon(location.coords.longitude);
+            setLocationLoaded(true);
+        }, (err) => {
+          console.log(err)
+        }, {
+          enableHighAccuracy: true,
+        })
+
+        return () => navigator.geolocation.clearWatch(watch)
+      }, []);
+
+      
 
         return(
         <div>
