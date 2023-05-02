@@ -2,85 +2,77 @@ import { useState, useEffect } from "react"
 import { Question } from "../components/Question"
 import { PlayerCard } from "../components/PlayerCard"
 import { Timer } from "../components/Timer";
-
-type User = {
-    id: string;
-    name: string;
-    location: string;
-}
+import { useLocation, useNavigate } from "react-router-dom";
+import { auth, database } from "../firebase_setup/firebase";
+import { equalTo, get, getDatabase, onValue, orderByChild, orderByKey, query, ref } from "firebase/database";
+import {User, Room} from "../lib/types"
 
 export const Game = () => {
-
+    const [data, setData] = useState();
+    const [room, setRoom] = useState<Room>();
     const [users, setUsers] = useState<User[]>([]);
     const [timer, setTimer] = useState("05");
     const [response, setResponse] = useState("");
 
-    const [lat, setLat] = useState(0);
-    const [lon, setLon] = useState(0);
-    const [locationLoaded, setLocationLoaded] = useState(false);
-    const [locationData, setLocationData] = useState(null);
+    const navigate = useNavigate();
+
+    const {state} = useLocation();
+    const roomId = state.roomId;
+
 
     useEffect(() => {
-        const watch = navigator.geolocation.watchPosition((location) => {
-          setLat(location.coords.latitude);
-          setLon(location.coords.longitude);
-          setLocationLoaded(true);
-        }, (err) => {
-          console.log(err)
-        }, {
-          enableHighAccuracy: true,
-        })
-        const fetchAPI = async () => {
-            const url = 'https://api-bdc.net/data/reverse-geocode';
-            const latitude = lat;
-            const longitude = lon;
-            const localityLanguage = 'en';
-            const apiKey = 'bdc_df38e981116f4f8781389060be80ad53';
-      
-            const response = await fetch(`${url}?latitude=${latitude}&longitude=${longitude}&localityLanguage=${localityLanguage}&key=${apiKey}`);
-      
-            if (response.ok) {
-              const jsonData = await response.json();
-              setLocationData(jsonData);
-              console.log(locationData)
-            } else {
-              console.error(`HTTP error! status: ${response.status}`);
-            }
-          };
-          fetchAPI();
+        const userRef = ref(database, `/rooms/${roomId}/users`);
 
-        return () => navigator.geolocation.clearWatch(watch)
-      }, []);
+        
+        
+        onValue(userRef, (snapshot) => {
+          const users = snapshot.val();
+          const newUserList: User[] = [];
+    
+          for (let id in users) {
+            newUserList.push({ id, ...users[id] });
+          };
+    
+          setUsers(newUserList);
+        });
+    }, [database]);
+
+    useEffect(() => {
+      const roomRef = ref(database, `/rooms/${roomId}`)
+      onValue(roomRef, (snapshot) => {
+        const newRoom: Room = snapshot.val()
+        setRoom(newRoom)
+      })
+
+    }, [])
 
 
     return(
-        <main>
-            <>        
-            <Question prompt={"What food should you not bring to a potluck."}/>
-            {users.map(user => {
-                <PlayerCard name={user.name} geolocation={user.location}/>
-            })}
-            <input type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
-            <button>SUBMIT RESPONSE</button>
-            <Timer timer={timer} update={setTimer}/>
-            <button>START GAME</button>
-            </>
-            
+      <main>
+        <>
+        {room &&
+          <>
+            <h1>ROOM CODE: {room.roomCode}</h1>
+            <h2>HOST: {room.host}</h2> 
+          </>
+        }       
+        <Question prompt={"What food should you not bring to a potluck."}/>
+        
+        <input type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
+        <button>SUBMIT RESPONSE</button>
+        <Timer timer={timer} update={setTimer}/>
+        <button>START GAME</button>
+        </>
+        
 
-            <div className='player-card-label'>
-                {locationData ? ( 
-                    <PlayerCard name='namegoesHERE' geolocation={`${locationData.city}, ${locationData.principalSubdivision}, ${locationData.countryCode}`} />
-                ) : (
-                    <PlayerCard name='namegoesHERE' geolocation='Loading...' />
-                )}
+        <div className=".player-card-label">
+          {users.map((user, index) => {
+          return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location}/>
+          })}
+        </div>
+          
 
-                My location is: {locationLoaded ? (`Lat: ${lat}, Lon: ${lon}`) : 'Loading...'}
-                {/* <p>{locationData.city}, {locationData.principalSubdivision}, {locationData.countryCode}</p> */}
-            </div>
-            
-            
-
-        </main>
+      </main>
 
     )
 }
