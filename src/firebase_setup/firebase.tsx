@@ -48,7 +48,7 @@ export const createAnonymousAccount = () => {
       }
       const user = userCredential.user as authUser;
       if (user && user.accessToken) {
-        // window.localStorage.setItem("token", user.accessToken)
+        window.localStorage.setItem("token", user.accessToken)
         console.log("Authenticated")
       };
     })
@@ -61,22 +61,24 @@ export const createAnonymousAccount = () => {
   })
 }
 
-  export const loginUser = (email:string, password:string) => {signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      // Signed in 
-      type authUser = User & {
-        accessToken: string,
-      }
-      const user = userCredential.user as authUser;
-      if (user && user.accessToken) window.localStorage.setItem("token", user.accessToken);
-      // ...
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      // ..
-    });}
+export const loginUser = (email:string, password:string) => {signInWithEmailAndPassword(auth, email, password)
+  .then((userCredential) => {
+    // Signed in 
+    type authUser = User & {
+      accessToken: string,
+    }
+    const user = userCredential.user as authUser;
+    if (user && user.accessToken) window.localStorage.setItem("token", user.accessToken);
+    // ...
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    // ..
+  });}
 
-  
+
+
+
 
   
