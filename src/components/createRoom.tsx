@@ -3,6 +3,7 @@ import { database } from "../firebase_setup/firebase";
 import { equalTo, onValue, orderByChild, push, query, ref } from "firebase/database";
 import { useNavigate } from "react-router-dom";
 import { useSpring, animated } from '@react-spring/web'
+import { Question } from "./Question";
 
 export const CreateRoom = () => {
 
@@ -76,7 +77,8 @@ export const CreateRoom = () => {
 
         const room = {
           roomCode: roomCode,
-          host: host
+          host: host,
+          question: 1,
         };
         const result = await push(roomRef, room);
         onValue(result, (snapshot)=> {
@@ -87,7 +89,7 @@ export const CreateRoom = () => {
         <div>
             <div>
             {/* <input placeholder="roomcode..." value={roomCode} onChange={(e) => setRoomCode(e.target.value)}></input> */}
-            <input className="margin-center" placeholder="player name..." value={host} onChange={(e) => setHost(e.target.value)}></input>
+            <input className="left-center" placeholder="player name..." value={host} onChange={(e) => setHost(e.target.value)}></input>
             <button className="margin-center" onClick={() => {createRoom(); }}>Host</button>
             </div>
             <br></br>

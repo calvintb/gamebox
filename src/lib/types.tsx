@@ -13,5 +13,10 @@ export type Location = {
 
 export type Room = {
     host: string,
-    roomCode: string
+    roomCode: string,
+    question: number
+}
+
+export type Questions = {
+    text: string,
 }
