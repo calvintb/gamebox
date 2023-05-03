@@ -2,8 +2,36 @@ import { useEffect, useState } from "react"
 import { database } from "../firebase_setup/firebase";
 import { equalTo, onValue, orderByChild, push, query, ref } from "firebase/database";
 import { useNavigate } from "react-router-dom";
+import { useSpring, animated } from '@react-spring/web'
 
 export const CreateRoom = () => {
+
+  const [click, setClick] = useState(false);
+
+  function isClicked() {
+      if(click){
+          return 1200;
+      }else {
+          return 100;   
+      }
+  }
+
+  const [springs, api] = useSpring(() => ({     
+    from: { x: 700 },
+  }))
+
+  const handleClick = () => {
+      setClick(!click);
+      api.start({
+          from: {
+            x: springs.x,
+          },
+          to: {
+            x: isClicked(),
+          },
+      })
+  }
+
     const [roomCode, setRoomCode] = useState("")
     const [data, setData] = useState();
     const [host, setHost] = useState("")
@@ -57,9 +85,14 @@ export const CreateRoom = () => {
     }
     return (
         <div>
+            <div>
             {/* <input placeholder="roomcode..." value={roomCode} onChange={(e) => setRoomCode(e.target.value)}></input> */}
-            <input placeholder="player name..." value={host} onChange={(e) => setHost(e.target.value)}></input>
-            <button onClick={() => {createRoom(); }}>Host</button>
+            <input className="margin-center" placeholder="player name..." value={host} onChange={(e) => setHost(e.target.value)}></input>
+            <button className="margin-center" onClick={() => {createRoom(); }}>Host</button>
+            </div>
+            <br></br>
+            <br></br>
+            <animated.button onClick={handleClick} style={{...springs}}>click me</animated.button>
         </div>
     )
 }

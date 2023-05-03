@@ -3,8 +3,9 @@ import { auth, createAccount, createAnonymousAccount, database } from "../fireba
 import { useNavigate } from "react-router-dom";
 import { DataSnapshot, equalTo, get, onValue, orderByChild, orderByKey, push, query, ref, set } from "firebase/database";
 import { Location, User } from "../lib/types";
+import "../index.css"
+import { useSpring, animated, SpringValue } from '@react-spring/web'
 import { getAuth, verifyBeforeUpdateEmail } from "firebase/auth";
-
 
 
 export const SignUp = () => {
@@ -20,8 +21,11 @@ export const SignUp = () => {
     const [lon, setLon] = useState(0);
     const [locationLoaded, setLocationLoaded] = useState(false);
     const [locationData, setLocationData] = useState<Location>();
+
+    const [click, setClick] = useState(false);
     const [id, setId] = useState("");
     const [alreadyIn, setAlreadyIn] = useState(false);
+
 
     const [authenticated, setAuthenticated] = useState(false)
     const navigate = useNavigate();
@@ -185,11 +189,53 @@ export const SignUp = () => {
         return
     }, [lat, lon])
 
+    useEffect(() => {
+        const watch = navigator.geolocation.watchPosition((location) => {
+            setLat(location.coords.latitude);
+            setLon(location.coords.longitude);
+            setLocationLoaded(true);
+        }, (err) => {
+          console.log(err)
+          const tempLocation: Location = {
+            city: "Game",
+            principalSubdivision: "Box",
+            countryCode: "Location"
+          }
+          setLocationData(tempLocation)
+        }, {
+          enableHighAccuracy: true,
+        })
 
-      
+        return () => navigator.geolocation.clearWatch(watch)
+      }, []);
 
+    const [springs, api] = useSpring(() => ({     
+        from: { x: 700 },
+    }))
+
+    function isClicked() {
+        if(click){
+            return 1200;
+        }else {
+            return 100;   
+        }
+    }
+
+    const handleClick = () => {
+        setClick(!click);
+        api.start({
+            from: {
+              x: springs.x,
+            },
+            to: {
+              x: isClicked(),
+            },
+        })
+    }
+    
         return(
         <div>
+            <h1>Join Room</h1>
             {!alreadyIn &&
                 <>
                 <p>This is the Sign Up Page</p>
@@ -199,12 +245,16 @@ export const SignUp = () => {
                     <button onClick={() => {}}type="submit">Join</button>
                     <p>{error}</p>
                 </form>
+                <div className="container">
+                  <h2>Room Code</h2>
+                  <h2>Username</h2>
+                </div>
                 </>
             }
 
             {alreadyIn &&
                 <>
-                <p>Got kicked out? No worries! Just enter the room code & your username again below:</p>
+                <h2>Got kicked out? No worries! Just enter the room code & your username again below:</h2>
                  <form onSubmit={(e)=>{e.preventDefault(); loginUserAgain();}}>
                     <input value={password} onChange={(e)=>setPassword(e.target.value)}/>
                     <input value={username} onChange={(e)=>setUsername(e.target.value)}/>
@@ -212,11 +262,11 @@ export const SignUp = () => {
                     <p>{error}</p>
                 </form>
                 <button onClick={() => {window.localStorage.setItem("token", ""); navigate('/')}}>Sign into a different room</button>
+                <animated.button style={{...springs}} onClick={handleClick}>Click me</animated.button>
                 </>
-               
-            
+             
             }
-            
+
         </div>
     )
 }
