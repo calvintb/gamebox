@@ -238,30 +238,32 @@ export const SignUp = () => {
             <h1>Join Room</h1>
             {!alreadyIn &&
                 <>
-                <p>This is the Sign Up Page</p>
-                <form onSubmit={(e)=>{e.preventDefault(); addUser(); createAnonymousAccount();}}>
+                <h2 className="center">{error}</h2>
+                <form className="center" onSubmit={(e)=>{e.preventDefault(); addUser(); createAnonymousAccount();}}>
                     <input value={password} onChange={(e)=>setPassword(e.target.value)}/>
                     <input value={username} onChange={(e)=>setUsername(e.target.value)}/>
                     <button onClick={() => {}}type="submit">Join</button>
-                    <p>{error}</p>
                 </form>
-                <div className="container">
+                <div className="left-center">
                   <h2>Room Code</h2>
-                  <h2>Username</h2>
+                  <h2 className="left-pad"> Username</h2>
                 </div>
                 </>
             }
 
             {alreadyIn &&
                 <>
-                <h2>Got kicked out? No worries! Just enter the room code & your username again below:</h2>
-                 <form onSubmit={(e)=>{e.preventDefault(); loginUserAgain();}}>
+                <h2 className="center">Got kicked out? No worries! Just enter the room code & your username again below:</h2>
+                <h2 className="center">{error}</h2>
+                 <form className="center" onSubmit={(e)=>{e.preventDefault(); loginUserAgain();}}>
                     <input value={password} onChange={(e)=>setPassword(e.target.value)}/>
                     <input value={username} onChange={(e)=>setUsername(e.target.value)}/>
-                    <button onClick={() => {}}type="submit">Join</button>
-                    <p>{error}</p>
+                    <button onClick={() => {}}type="submit">Join</button>  
                 </form>
-                <button onClick={() => {window.localStorage.setItem("token", ""); navigate('/')}}>Sign into a different room</button>
+                <br></br>
+                <button className="margin-center" onClick={() => {window.localStorage.setItem("token", ""); navigate('/')}}>Sign into a different room</button>
+                <br></br>
+                <br></br>
                 <animated.button style={{...springs}} onClick={handleClick}>Click me</animated.button>
                 </>
              
