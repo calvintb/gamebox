@@ -3,6 +3,7 @@ export type User = {
     name: string,
     location: string,
     response: string,
+    points: number
 }
 
 export type Location = {
@@ -14,4 +15,9 @@ export type Location = {
 export type Room = {
     host: string,
     roomCode: string
+}
+
+export type Response = {
+    response: string,
+    username: string
 }

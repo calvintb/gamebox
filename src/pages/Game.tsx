@@ -4,7 +4,7 @@ import { PlayerCard } from "../components/PlayerCard"
 import { Timer } from "../components/Timer";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth, database } from "../firebase_setup/firebase";
-import { equalTo, get, getDatabase, onValue, orderByChild, orderByKey, query, ref, remove } from "firebase/database";
+import { equalTo, get, getDatabase, onValue, orderByChild, orderByKey, query, ref, remove, update } from "firebase/database";
 import {User, Room} from "../lib/types"
 import { useSpring, animated } from '@react-spring/web'
 
@@ -91,6 +91,22 @@ export const Game = () => {
     }
 
 
+    const givePlayerPoint = (player:User) => {
+      console.log(player.name + " got a point!")
+      
+      const userRef = ref(database, `/rooms/${location.state.roomId}/users/${player.name}`)
+      update(userRef, {
+        points: player.points + 1
+      })
+      setVoted(true)
+    }
+
+    const checkWinner = () => {
+      const winner = users.reduce((prev, current) => (prev.points > current.points) ? prev : current)    
+      console.log(winner)
+    }
+
+    const [voted, setVoted] = useState(false)
     return(
       <main>
         <>
@@ -147,8 +163,33 @@ export const Game = () => {
 
         <div className=".player-card-label">
           {users.map((user, index) => {
-          return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location}/>
+          return (
+              <div key={index + user.name}>
+                <PlayerCard  name={user.name} geolocation={user.location}/>
+                {user.response && <p>{user.name} submitted their cool answer...</p>}
+              </div>
+            )
           })}
+        </div>
+
+        <div>
+          {users.map((user, index) => {
+            return (
+              <div key={index + user.id}>
+                {user.response && 
+                  <div>
+                    <p>{user.response}</p>
+                    {!voted &&
+                      <button onClick={(e) => {givePlayerPoint(user)}}>Vote</button>
+                    }
+                    
+                  </div>
+                }
+             
+              </div>
+            )
+          })}
+             <button onClick={() => {checkWinner()}}>Check Winner</button>
         </div>
 
 
