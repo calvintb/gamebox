@@ -172,6 +172,7 @@ export const Game = () => {
           })}
         </div>
 
+{/* below is code for displaying responses and tracking points, also include: checkWinner(), givePlayerPoint(), and adding point: 0 in signUp */}
         <div>
           {users.map((user, index) => {
             return (
