@@ -5,7 +5,7 @@ import { Timer } from "../components/Timer";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth, database } from "../firebase_setup/firebase";
 import { equalTo, get, getDatabase, onValue, orderByChild, orderByKey, query, ref, remove } from "firebase/database";
-import {User, Room} from "../lib/types"
+import {User, Room, Questions} from "../lib/types"
 import { useSpring, animated } from '@react-spring/web'
 
 export const Game = () => {
@@ -14,6 +14,7 @@ export const Game = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [timer, setTimer] = useState("05");
     const [response, setResponse] = useState("");
+    const [question, setQuestion] = useState<Questions>();
     // const [roomId, setRoomId] = useState("");
 
     const navigate = useNavigate();
@@ -44,7 +45,7 @@ export const Game = () => {
         loop: true,
         config: {duration: 10000},
     }))
-
+    //end spring stuff
 
     useEffect(() => {
         if(!location.state){
@@ -80,6 +81,22 @@ export const Game = () => {
 
     }, [])
 
+    function randNum(min: number, max: number) { // min and max included 
+      return Math.floor(Math.random() * (max - min + 1) + min)
+    }
+
+    useEffect(() => {
+      const rndInt = randNum(1, 5);
+      console.log(rndInt);
+      const quest = ref(database, `/Question/${rndInt}`)
+      console.log(quest);
+      onValue(quest, (snapshot) => {
+        const newQuestion: Questions = snapshot.val()
+        setQuestion(newQuestion);
+        console.log(question);
+      })
+    }, [])
+
     const leaveGame = () => {
       window.localStorage.setItem("token", "");
       
@@ -87,9 +104,7 @@ export const Game = () => {
       remove(leavingUser)
       navigate('/')
       //Also remove user from game room list in RTDB
-
     }
-
 
     return(
       <main>
@@ -101,6 +116,7 @@ export const Game = () => {
           </>
         }       
         <Question prompt={"What food should you not bring to a potluck?"}/>
+        <div>{question?.value}</div>
         <div>
 
         <animated.div
@@ -138,11 +154,13 @@ export const Game = () => {
         <br></br>
         
         <input className="margin-center" type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
-        <button className="margin-center">SUBMIT RESPONSE</button>
+        <button className="left-center">SUBMIT RESPONSE</button>
         <Timer timer={timer} update={setTimer}/>
 
-        <button>START GAME</button> <button onClick={() => {leaveGame()}}>Leave</button>
-
+        <button className="margin-center">START GAME</button> 
+        <br></br>
+        <br></br>
+        <button className="right-center" onClick={() => {leaveGame()}}>Leave</button>
         </>
 
         <div className=".player-card-label">

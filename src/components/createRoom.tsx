@@ -87,7 +87,7 @@ export const CreateRoom = () => {
         <div>
             <div>
             {/* <input placeholder="roomcode..." value={roomCode} onChange={(e) => setRoomCode(e.target.value)}></input> */}
-            <input className="margin-center" placeholder="player name..." value={host} onChange={(e) => setHost(e.target.value)}></input>
+            <input className="left-center" placeholder="player name..." value={host} onChange={(e) => setHost(e.target.value)}></input>
             <button className="margin-center" onClick={() => {createRoom(); }}>Host</button>
             </div>
             <br></br>

@@ -94,6 +94,14 @@ h2 {
   margin-left: 45%;
 }
 
+.left-center {
+  margin-left: 43%;
+}
+
+.right-center {
+  margin-left: 47%;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;

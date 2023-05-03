@@ -15,3 +15,8 @@ export type Room = {
     host: string,
     roomCode: string
 }
+
+export type Questions = {
+    value: string,
+    key: number
+}
