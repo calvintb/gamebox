@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react"
-import { auth, createAccount, database } from "../firebase_setup/firebase";
+import { auth, createAccount, createAnonymousAccount, database } from "../firebase_setup/firebase";
 import { useNavigate } from "react-router-dom";
-import { equalTo, get, onValue, orderByChild, orderByKey, push, query, ref, set } from "firebase/database";
+import { DataSnapshot, equalTo, get, onValue, orderByChild, orderByKey, push, query, ref, set } from "firebase/database";
 import { Location, User } from "../lib/types";
+import { getAuth, verifyBeforeUpdateEmail } from "firebase/auth";
+
+
 
 export const SignUp = () => {
     const [data, setData] = useState();
@@ -17,6 +20,8 @@ export const SignUp = () => {
     const [lon, setLon] = useState(0);
     const [locationLoaded, setLocationLoaded] = useState(false);
     const [locationData, setLocationData] = useState<Location>();
+    const [id, setId] = useState("");
+    const [alreadyIn, setAlreadyIn] = useState(false);
 
     const [authenticated, setAuthenticated] = useState(false)
     const navigate = useNavigate();
@@ -41,6 +46,7 @@ export const SignUp = () => {
         };
       }, [password]);
 
+
     useEffect(() => {
         const roomRef = ref(database, `rooms/${roomId}/users`);
         const roomQuery = query(roomRef, orderByChild('name'), equalTo(username));
@@ -57,9 +63,8 @@ export const SignUp = () => {
             listener(); // Clean up the listener when the component unmounts
         };
     }, [roomId, username]);
-    
 
-    //  where we would include geolocation as well
+
     const addUser = async () => { 
         if (!data) {
             setError("No Room Found!")
@@ -70,12 +75,17 @@ export const SignUp = () => {
             return
         }
 
+        if (!username) {
+            setError("Please Enter a Username!")
+            return
+        }
+
         if(data && locationData && roomId && !nameTaken) {
             console.log(locationData.city)
             setCreatedUser(true)
             set(ref(database, `/rooms/${roomId}/users/` + username), {
                 name: username,
-                id: auth.currentUser?.uid ? auth.currentUser?.uid : "null",
+                id: auth.currentUser?.uid,
                 location: `${locationData.city}, ${locationData.principalSubdivision} ${locationData.countryCode}`,
                 response: "" 
             });
@@ -84,21 +94,66 @@ export const SignUp = () => {
         return       
     };
 
-    // useEffect(()=>{
-    //     const authObserver = auth.onAuthStateChanged((user) => {
-    //         if (user && !authenticated && username) {
-    //             setAuthenticated(true)
-    //         }
-    //     })
-    //     return () => {
-    //         authObserver();
-    //     }
+    const loginUserAgain = () => {
+        const userRef = ref(database, `/rooms/${roomId}/users`)
+        const userQuery = query(userRef, orderByKey(), equalTo(username))
         
-    // }, []);
+        onValue(userQuery, (snapshot) => {
+            if(snapshot.val()){
+                navigate('/game', {state: {roomId: roomId, user: username}})
+            }else {
+                setError("Not a valid room")
+            }
+        })
+    }
+
+
+    useEffect(() => {
+        const token = window.localStorage.getItem("token");
+        if (token) {
+            setAlreadyIn(true)
+        }
+
+
+        const watch = navigator.geolocation.watchPosition((location) => {
+            setLat(location.coords.latitude);
+            setLon(location.coords.longitude);
+            setLocationLoaded(true);
+        }, (err) => {
+          console.log(err)
+          const tempLocation: Location = {
+            city: "Somewhere",
+            principalSubdivision: "Planet Earth",
+            countryCode: ":)"
+          }
+          setLocationData(tempLocation)
+        }, {
+          enableHighAccuracy: true,
+        })
+
+
+        const authObserver = auth.onAuthStateChanged((user) => {
+          if (user) {
+            setAuthenticated(true);
+            setId(user.uid)
+          } else {
+            setAuthenticated(false);
+            setId("")
+          }
+        });
+      
+        return () => {
+          authObserver(); // unsubscribe the observer when the component unmounts
+          navigator.geolocation.clearWatch(watch);
+        };
+      }, []);
+
 
     useEffect(() => {
         if(createdUser) {
-            navigate('/game', {state: {roomId: roomId}})
+            console.log(roomId)
+
+            navigate('/game', {state: {roomId: roomId, user: username}})
         }
         return
     }, [createdUser])
@@ -131,38 +186,36 @@ export const SignUp = () => {
     }, [lat, lon])
 
 
-    useEffect(() => {
-        const watch = navigator.geolocation.watchPosition((location) => {
-            setLat(location.coords.latitude);
-            setLon(location.coords.longitude);
-            setLocationLoaded(true);
-        }, (err) => {
-          console.log(err)
-          const tempLocation: Location = {
-            city: "Game",
-            principalSubdivision: "Box",
-            countryCode: "Location"
-          }
-          setLocationData(tempLocation)
-        }, {
-          enableHighAccuracy: true,
-        })
-
-        return () => navigator.geolocation.clearWatch(watch)
-      }, []);
-
       
 
         return(
         <div>
-            This is the Sign Up Page
-            <form onSubmit={(e)=>{e.preventDefault(); addUser(); createAccount(email, password, username);}}>
-                <input value={email} onChange={(e)=>setEmail(e.target.value)}/>
-                <input value={password} onChange={(e)=>setPassword(e.target.value)}/>
-                <input value={username} onChange={(e)=>setUsername(e.target.value)}/>
-                <button onClick={() => {}}type="submit">Sign Up</button>
-                <p>{error}</p>
-            </form>
+            {!alreadyIn &&
+                <>
+                <p>This is the Sign Up Page</p>
+                <form onSubmit={(e)=>{e.preventDefault(); addUser(); createAnonymousAccount();}}>
+                    <input value={password} onChange={(e)=>setPassword(e.target.value)}/>
+                    <input value={username} onChange={(e)=>setUsername(e.target.value)}/>
+                    <button onClick={() => {}}type="submit">Join</button>
+                    <p>{error}</p>
+                </form>
+                </>
+            }
+
+            {alreadyIn &&
+                <>
+                <p>Got kicked out? No worries! Just enter the room code & your username again below:</p>
+                 <form onSubmit={(e)=>{e.preventDefault(); loginUserAgain();}}>
+                    <input value={password} onChange={(e)=>setPassword(e.target.value)}/>
+                    <input value={username} onChange={(e)=>setUsername(e.target.value)}/>
+                    <button onClick={() => {}}type="submit">Join</button>
+                    <p>{error}</p>
+                </form>
+                <button onClick={() => {window.localStorage.setItem("token", ""); navigate('/')}}>Sign into a different room</button>
+                </>
+               
+            
+            }
             
         </div>
     )
