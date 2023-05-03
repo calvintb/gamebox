@@ -105,7 +105,7 @@ export const SignUp = () => {
         
         onValue(userQuery, (snapshot) => {
             if(snapshot.val()){
-                navigate('/game', {state: {roomId: roomId, user: username}})
+                navigate('/game', {state: {roomId: roomId, user: username, host:false}})
             }else {
                 setError("Not a valid room")
             }
@@ -158,7 +158,7 @@ export const SignUp = () => {
         if(createdUser) {
             console.log(roomId)
 
-            navigate('/game', {state: {roomId: roomId, user: username}})
+            navigate('/game', {state: {roomId: roomId, user: username, host:false}})
         }
         return
     }, [createdUser])

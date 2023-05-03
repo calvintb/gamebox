@@ -80,7 +80,7 @@ export const CreateRoom = () => {
         };
         const result = await push(roomRef, room);
         onValue(result, (snapshot)=> {
-            navigate('/game', {state: {roomId:result.key}})
+            navigate('/game', {state: {roomId:result.key, host:true}})
         })
     }
     return (

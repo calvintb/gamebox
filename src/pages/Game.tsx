@@ -152,9 +152,15 @@ export const Game = () => {
       </animated.div>
         </div>
         <br></br>
+
+        {!location.state.host &&
+         <>
+            <input className="margin-center" type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
+            <button className="margin-center">SUBMIT RESPONSE</button>   
+         </>
+        }
         
-        <input className="margin-center" type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
-        <button className="margin-center">SUBMIT RESPONSE</button>
+        
         <Timer timer={timer} update={setTimer}/>
 
         <button>START GAME</button> <button onClick={() => {leaveGame()}}>Leave</button>
