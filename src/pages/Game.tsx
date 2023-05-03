@@ -14,7 +14,7 @@ export const Game = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [timer, setTimer] = useState("05");
     const [response, setResponse] = useState("");
-    const [question, setQuestion] = useState<Questions>();
+    const [question, setQuestion] = useState("");
     // const [roomId, setRoomId] = useState("");
 
     const navigate = useNavigate();
@@ -86,16 +86,14 @@ export const Game = () => {
     }
 
     useEffect(() => {
-      const rndInt = randNum(1, 5);
-      console.log(rndInt);
-      const quest = ref(database, `/Question/${rndInt}`)
-      console.log(quest);
+      const quest = ref(database, `/questions/${room?.question}`)
       onValue(quest, (snapshot) => {
-        const newQuestion: Questions = snapshot.val()
-        setQuestion(newQuestion);
-        console.log(question);
+        if (snapshot.val()) {
+          const newQuestion = snapshot.val()
+          setQuestion(newQuestion.text);
+        }
       })
-    }, [])
+    }, [room])
 
     const leaveGame = () => {
       window.localStorage.setItem("token", "");
@@ -115,8 +113,8 @@ export const Game = () => {
             <h2 className="center">HOST: {room.host}</h2> 
           </>
         }       
-        <Question prompt={"What food should you not bring to a potluck?"}/>
-        <div>{question?.value}</div>
+        <Question prompt={question}/>
+        <div></div>
         <div>
 
         <animated.div
