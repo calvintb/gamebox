@@ -6,7 +6,7 @@ export const Question = ({prompt}: Props) => {
 
     return (
         <div>
-            <h1>{prompt}</h1>
+            <h1 className="smaller">{prompt}</h1>
         </div>
     )
 }

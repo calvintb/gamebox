@@ -5,8 +5,6 @@ import { useState } from 'react'
 export const Spring = () => {
 
     const [reverse, setReverse] = useState(false);
-
-
     const [springs, api] = useSpring(() => ({     
         from: { x: 1500, rotate: 0},
         to: { x: -100, rotate: 1000},

@@ -3,6 +3,8 @@ import { auth, createAccount, database } from "../firebase_setup/firebase";
 import { useNavigate } from "react-router-dom";
 import { equalTo, get, onValue, orderByChild, orderByKey, push, query, ref, set } from "firebase/database";
 import { Location, User } from "../lib/types";
+import "../index.css"
+import { useSpring, animated, SpringValue } from '@react-spring/web'
 
 export const SignUp = () => {
     const [data, setData] = useState();
@@ -17,6 +19,7 @@ export const SignUp = () => {
     const [lon, setLon] = useState(0);
     const [locationLoaded, setLocationLoaded] = useState(false);
     const [locationData, setLocationData] = useState<Location>();
+    const [click, setClick] = useState(false);
 
     const [authenticated, setAuthenticated] = useState(false)
     const navigate = useNavigate();
@@ -151,19 +154,47 @@ export const SignUp = () => {
         return () => navigator.geolocation.clearWatch(watch)
       }, []);
 
-      
+    const [springs, api] = useSpring(() => ({     
+        from: { x: 700 },
+    }))
+
+    function isClicked() {
+        if(click){
+            return 1200;
+        }else {
+            return 100;   
+        }
+    }
+
+    const handleClick = () => {
+        setClick(!click);
+        api.start({
+            from: {
+              x: springs.x,
+            },
+            to: {
+              x: isClicked(),
+            },
+        })
+    }
 
         return(
         <div>
-            This is the Sign Up Page
-            <form onSubmit={(e)=>{e.preventDefault(); addUser(); createAccount(email, password, username);}}>
+            <h1>Join Room</h1>
+            <h2 className="center">{error}</h2>
+            <form className="center" onSubmit={(e)=>{e.preventDefault(); addUser(); createAccount(email, password, username);}}>
                 <input value={email} onChange={(e)=>setEmail(e.target.value)}/>
                 <input value={password} onChange={(e)=>setPassword(e.target.value)}/>
                 <input value={username} onChange={(e)=>setUsername(e.target.value)}/>
-                <button onClick={() => {}}type="submit">Sign Up</button>
-                <p>{error}</p>
+                <button onClick={() => {}} type="submit">Join</button>
             </form>
-            
+    
+            <div className="container">
+                <h2>Email</h2>
+                <h2>Room Code</h2>
+                <h2>Username</h2>
+            </div>
+            <animated.button style={{...springs}} onClick={handleClick}>Click me</animated.button>
         </div>
     )
 }
