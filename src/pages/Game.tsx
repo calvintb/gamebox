@@ -4,7 +4,7 @@ import { PlayerCard } from "../components/PlayerCard"
 import { Timer } from "../components/Timer";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth, database } from "../firebase_setup/firebase";
-import { equalTo, get, getDatabase, onValue, orderByChild, orderByKey, query, ref } from "firebase/database";
+import { equalTo, get, getDatabase, onValue, orderByChild, orderByKey, query, ref, remove } from "firebase/database";
 import {User, Room} from "../lib/types"
 
 export const Game = () => {
@@ -55,6 +55,15 @@ export const Game = () => {
 
     }, [])
 
+    const leaveGame = () => {
+      window.localStorage.setItem("token", "");
+      
+      const leavingUser = ref(database, `/rooms/${location.state.roomId}/users/${location.state.user}`)
+      remove(leavingUser)
+      navigate('/')
+      //Also remove user from game room list in RTDB
+
+    }
 
     return(
       <main>
@@ -70,7 +79,7 @@ export const Game = () => {
         <input type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
         <button>SUBMIT RESPONSE</button>
         <Timer timer={timer} update={setTimer}/>
-        <button>START GAME</button>
+        <button>START GAME</button> <button onClick={() => {leaveGame()}}>Leave</button>
         </>
         
 
