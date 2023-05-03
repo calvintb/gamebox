@@ -57,6 +57,16 @@ h2 {
   justify-content: center;
 }
 
+.left-center {
+  display: flex;
+  justify-content: center;
+  margin-left: -5%;
+}
+
+.left-pad {
+  margin-left: 3%;
+}
+
 .container {
   margin-left: 32%;
   display: flex;
@@ -76,7 +86,7 @@ h2 {
 }
 
 .vertical-center {
-  margin-top: 30%;
+  margin-top: 10%;
   /* margin-left: 45%; */
 }
 
