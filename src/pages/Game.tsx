@@ -13,21 +13,21 @@ export const Game = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [timer, setTimer] = useState("05");
     const [response, setResponse] = useState("");
+    // const [roomId, setRoomId] = useState("");
 
     const navigate = useNavigate();
 
-    const {state} = useLocation();
-    if (!state) {
-      navigate('/signUp')
-    }
-    const roomId = state.roomId;
-    
+    const location = useLocation();
+
 
 
     useEffect(() => {
-        const userRef = ref(database, `/rooms/${roomId}/users`);
+        if(!location.state){
+          navigate('/')
+        }
+        const roomId = location.state.roomId;
 
-        
+        const userRef = ref(database, `/rooms/${roomId}/users`);
         
         onValue(userRef, (snapshot) => {
           const users = snapshot.val();
@@ -42,6 +42,11 @@ export const Game = () => {
     }, [database]);
 
     useEffect(() => {
+      if(!location.state){
+        navigate('/')
+      }
+      const roomId = location.state.roomId;
+
       const roomRef = ref(database, `/rooms/${roomId}`)
       onValue(roomRef, (snapshot) => {
         const newRoom: Room = snapshot.val()
