@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react"
-import { auth, createAccount, database } from "../firebase_setup/firebase";
+import { auth, createAccount, createAnonymousAccount, database } from "../firebase_setup/firebase";
 import { useNavigate } from "react-router-dom";
 import { equalTo, get, onValue, orderByChild, orderByKey, push, query, ref, set } from "firebase/database";
 import { Location, User } from "../lib/types";
+import { getAuth } from "firebase/auth";
+
+
 
 export const SignUp = () => {
     const [data, setData] = useState();
@@ -17,6 +20,7 @@ export const SignUp = () => {
     const [lon, setLon] = useState(0);
     const [locationLoaded, setLocationLoaded] = useState(false);
     const [locationData, setLocationData] = useState<Location>();
+    const [id, setId] = useState("");
 
     const [authenticated, setAuthenticated] = useState(false)
     const navigate = useNavigate();
@@ -41,6 +45,7 @@ export const SignUp = () => {
         };
       }, [password]);
 
+
     useEffect(() => {
         const roomRef = ref(database, `rooms/${roomId}/users`);
         const roomQuery = query(roomRef, orderByChild('name'), equalTo(username));
@@ -59,7 +64,6 @@ export const SignUp = () => {
     }, [roomId, username]);
     
 
-    //  where we would include geolocation as well
     const addUser = async () => { 
         if (!data) {
             setError("No Room Found!")
@@ -70,12 +74,17 @@ export const SignUp = () => {
             return
         }
 
+        if (!username) {
+            setError("Please Enter a Username!")
+            return
+        }
+
         if(data && locationData && roomId && !nameTaken) {
             console.log(locationData.city)
             setCreatedUser(true)
             set(ref(database, `/rooms/${roomId}/users/` + username), {
                 name: username,
-                id: auth.currentUser?.uid ? auth.currentUser?.uid : "null",
+                id: auth.currentUser?.uid,
                 location: `${locationData.city}, ${locationData.principalSubdivision} ${locationData.countryCode}`,
                 response: "" 
             });
@@ -84,17 +93,19 @@ export const SignUp = () => {
         return       
     };
 
-    // useEffect(()=>{
-    //     const authObserver = auth.onAuthStateChanged((user) => {
-    //         if (user && !authenticated && username) {
-    //             setAuthenticated(true)
-    //         }
-    //     })
-    //     return () => {
-    //         authObserver();
-    //     }
-        
-    // }, []);
+    useEffect(() => {
+        const authObserver = auth.onAuthStateChanged((user) => {
+          if (user) {
+            setAuthenticated(true);
+          } else {
+            setAuthenticated(false);
+          }
+        });
+      
+        return () => {
+          authObserver(); // unsubscribe the observer when the component unmounts
+        };
+      }, []);
 
     useEffect(() => {
         if(createdUser) {
@@ -102,7 +113,6 @@ export const SignUp = () => {
         }
         return
     }, [createdUser])
-
 
     useEffect(() => {
         const fetchAPI = async () => {
@@ -130,7 +140,6 @@ export const SignUp = () => {
         return
     }, [lat, lon])
 
-
     useEffect(() => {
         const watch = navigator.geolocation.watchPosition((location) => {
             setLat(location.coords.latitude);
@@ -139,9 +148,9 @@ export const SignUp = () => {
         }, (err) => {
           console.log(err)
           const tempLocation: Location = {
-            city: "Game",
-            principalSubdivision: "Box",
-            countryCode: "Location"
+            city: "Somewhere",
+            principalSubdivision: "Planet Earth",
+            countryCode: ":)"
           }
           setLocationData(tempLocation)
         }, {
@@ -149,14 +158,14 @@ export const SignUp = () => {
         })
 
         return () => navigator.geolocation.clearWatch(watch)
-      }, []);
+    }, []);
 
       
 
         return(
         <div>
             This is the Sign Up Page
-            <form onSubmit={(e)=>{e.preventDefault(); addUser(); createAccount(email, password, username);}}>
+            <form onSubmit={(e)=>{e.preventDefault(); addUser(); createAnonymousAccount();}}>
                 <input value={email} onChange={(e)=>setEmail(e.target.value)}/>
                 <input value={password} onChange={(e)=>setPassword(e.target.value)}/>
                 <input value={username} onChange={(e)=>setUsername(e.target.value)}/>

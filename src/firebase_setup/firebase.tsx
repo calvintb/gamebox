@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, where, getDocs, getDoc, setDoc, doc } from "@firebase/firestore"
-import { getAuth, createUserWithEmailAndPassword, User, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, User, signInWithEmailAndPassword, signInAnonymously } from "firebase/auth";
 import { getDatabase, ref, child, get, set, query} from "firebase/database";
 
 const firebaseConfig = {
@@ -18,7 +18,8 @@ export const firestore = getFirestore(app)
 export const database = getDatabase(app);
 export const auth = getAuth(app);
 
-export const createAccount = (email:string, password:string, username:string) => {createUserWithEmailAndPassword(auth, email, password)
+export const createAccount = (email:string, password:string, username:string) => {
+  createUserWithEmailAndPassword(auth, email, password)
   .then((userCredential) => {
     // Signed in 
     type authUser = User & {
@@ -36,6 +37,29 @@ export const createAccount = (email:string, password:string, username:string) =>
     return errorMessage
     // ..
   });}
+
+export const createAnonymousAccount = () => {
+  auth.signOut().then(() => {
+    signInAnonymously(auth)
+    .then((userCredential) => {
+      // Signed in..
+      type authUser = User & {
+        accessToken: string,
+      }
+      const user = userCredential.user as authUser;
+      if (user && user.accessToken) {
+        // window.localStorage.setItem("token", user.accessToken)
+        console.log("Authenticated")
+      };
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorMessage)
+      // ...
+    }); 
+  })
+}
 
   export const loginUser = (email:string, password:string) => {signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {

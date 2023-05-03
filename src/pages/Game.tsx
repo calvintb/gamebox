@@ -17,7 +17,11 @@ export const Game = () => {
     const navigate = useNavigate();
 
     const {state} = useLocation();
+    if (!state) {
+      navigate('/signUp')
+    }
     const roomId = state.roomId;
+    
 
 
     useEffect(() => {
