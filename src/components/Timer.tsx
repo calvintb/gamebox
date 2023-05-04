@@ -7,7 +7,7 @@ type Props = {
 
 export const Timer = ({timer, update} : Props) => {
     const Ref = useRef(null);
-
+    let id: NodeJS.Timer;
 
 
     const getTimeRemaining = (e:Date) => {
@@ -22,12 +22,15 @@ export const Timer = ({timer, update} : Props) => {
         if (total >= 0) {
             update(seconds > 9 ? seconds: '0' + seconds);
         }
+        if (total == 0){
+            clearInterval(id);
+        }
     }
 
     const clearTimer = (e:Date) => {
         update(timer);
 
-        const id = setInterval(() => {
+        id = setInterval(() => {
             startTimer(e);
         }, 1000)
         if (timer == "00"){
@@ -35,6 +38,7 @@ export const Timer = ({timer, update} : Props) => {
         }
         return () => {
             console.log("I got unmounted");
+            clearInterval(id);
           }
     }
     
@@ -47,6 +51,9 @@ export const Timer = ({timer, update} : Props) => {
 
     useEffect(()=>{
         clearTimer(getDeadTime());
+        return () => {
+            clearInterval(id);
+        }
     },[]);
 
 

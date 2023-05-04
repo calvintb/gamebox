@@ -2,6 +2,9 @@ import { useState, useEffect } from "react"
 import { Question } from "../components/Question"
 import { PlayerCard } from "../components/PlayerCard"
 import { Timer } from "../components/Timer";
+import { auth, createAccount, database } from "../firebase_setup/firebase";
+import { equalTo, get, onValue, orderByChild, orderByKey, push, query, ref, remove, update, serverTimestamp } from "firebase/database";
+import { ResponseCard } from "../components/ResponseCard";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth, database } from "../firebase_setup/firebase";
 import { equalTo, get, getDatabase, onValue, orderByChild, orderByKey, query, ref, remove } from "firebase/database";
@@ -12,16 +15,31 @@ export const Game = () => {
     const [data, setData] = useState();
     const [room, setRoom] = useState<Room>();
     const [users, setUsers] = useState<User[]>([]);
-    const [timer, setTimer] = useState("05");
+    const [timer, setTimer] = useState("00");
     const [response, setResponse] = useState("");
     const [question, setQuestion] = useState("");
-    // const [roomId, setRoomId] = useState("");
-
+    const [responses, setResponses] = useState<string[]>([]);
+    let interval:NodeJS.Timer;
+    
     const navigate = useNavigate();
-
     const location = useLocation();
-
-
+    let hasStarted = false;
+    let showResponses = false;
+    const hasStartRef = ref(database, `/rooms/${location.state.roomId}`);
+    onValue(hasStartRef, (snapshot)=>{
+        hasStarted = snapshot.val().hasStarted
+        showResponses = snapshot.val().showResponses
+    })
+    const setHasStarted = (val:boolean) =>{
+        update(hasStartRef, {
+            hasStarted: val,
+            });
+    }
+    const setShowResponses = (val:boolean) =>{
+        update(hasStartRef, {
+            showResponses: val,
+            });
+    }
     //react spring stuff
     const [reverse, setReverse] = useState(false);
     const [springs, api] = useSpring(() => ({     
@@ -95,14 +113,97 @@ export const Game = () => {
       })
     }, [room])
 
+    useEffect(()=>{
+        const roomId = location.state.roomId;
+        const refe = ref(database, `/rooms/${roomId}`);
+        let timerHasStarted:boolean = false;
+        onValue(refe, (snapshot) => {
+            console.log(snapshot)
+            timerHasStarted = snapshot.val().seconds != 0
+            if (!timerHasStarted){
+                update(refe, {
+                    startAt: serverTimestamp(),
+                    seconds: 30
+                    });}
+            startTimer();
+                    
+                })
+    }, []);
+    
+    const startTimer = ()=>{
+        const serverTimeOffset = serverTimestamp();
+        const roomId = location.state.roomId;
+        const timeRef = ref(database, `/rooms/${roomId}`)
+        
+        onValue(timeRef, (snapshot) => {
+        const seconds = snapshot.val().seconds;
+        const startAt = snapshot.val().startAt;
+        if (interval) {
+            clearInterval(interval);
+        }
+        interval = setInterval(() => {
+            const timeLeft = (seconds * 1000) - (Date.now() - startAt);
+            if (timeLeft < 0) {
+                clearInterval(interval);
+                console.log("0.0 left") ;
+            if (hasStarted){
+                setShowResponses(true);
+            }
+            else if (!hasStarted){
+                setHasStarted(true);
+            }
+            }
+            else {
+                setTimer(`${Math.floor(timeLeft/1000)}.${timeLeft % 1000}`);
+                console.log(`${Math.floor(timeLeft/1000)}.${timeLeft % 1000}`);
+            }
+        }, 71);
+        });
+    }
+    
+
     const leaveGame = () => {
       window.localStorage.setItem("token", "");
       
       const leavingUser = ref(database, `/rooms/${location.state.roomId}/users/${location.state.user}`)
       remove(leavingUser)
       navigate('/')
-      //Also remove user from game room list in RTDB
     }
+
+    function postResponse () { 
+        if(response) {
+            const keys = Object.keys(response)
+            const userRef = ref(database, `/rooms/${location.state.roomId}/users/${location.state.user}`);
+            const user = {
+                response
+            };
+            update(userRef, user); 
+        }    
+               
+    };
+    if (hasStarted && !showResponses){
+        return (
+            <main>
+                <>
+                {room &&
+                <>
+                    <h1>ROOM CODE: {room.roomCode}</h1>
+                    <h2>HOST: {room.host}</h2> 
+                </>
+                }       
+                <Question prompt={"What food should you not bring to a potluck."}/>
+                
+                <input type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
+                <button onClick={()=>postResponse()}>SUBMIT RESPONSE</button>
+                <h1>{timer}</h1>
+                <button>START GAME</button> <button onClick={() => {leaveGame()}}>Leave</button>
+                </>
+                
+
+                <div className=".player-card-label">
+                
+                </div>
+                
 
     return(
       <main>
@@ -168,7 +269,49 @@ export const Game = () => {
         </div>
 
 
-      </main>
+            </main>
 
-    )
+    )}
+    else if (showResponses){
+        return(
+            <main>
+                <>
+                {room &&
+                <>
+                    <h1>ROOM CODE: {room.roomCode}</h1>
+                    <h2>HOST: {room.host}</h2> 
+                </>
+                }       
+                <Question prompt={"What food should you not bring to a potluck."}/>
+                
+                <button>Next Question</button> <button onClick={() => {leaveGame()}}>Leave</button>
+                </>
+                {responses.map((response, index) => {
+                return <ResponseCard key={index + response.username} answer={response.response} username={response.username}/>
+                })}
+
+                <div className=".player-card-label">
+                
+                </div>
+                
+
+            </main>
+        );
+    }
+    else{
+        return(
+            <>        
+                    {room &&
+                    <>
+                        <h1>ROOM CODE: {room.roomCode}</h1>
+                        <h2>HOST: {room.host}</h2> 
+                    </>
+                    }  
+            {users.map((user, index) => {
+                    return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location}/>
+                    })}
+            <button onClick={()=>setHasStarted(true)}>START GAME</button>
+            </>
+        );
+    }
 }

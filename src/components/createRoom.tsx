@@ -79,6 +79,8 @@ export const CreateRoom = () => {
           roomCode: roomCode,
           host: host,
           question: 1,
+          startAt: 0,
+          seconds: 0,
         };
         const result = await push(roomRef, room);
         onValue(result, (snapshot)=> {
