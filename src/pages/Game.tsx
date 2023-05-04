@@ -234,6 +234,8 @@ export const Game = () => {
         <br></br>
         <button className="right-center" onClick={() => {leaveGame()}}>Leave</button>
         </>
+        <h1>{timer}</h1>
+
 
         <div className=".player-card-label">
           {users.map((user, index) => {
