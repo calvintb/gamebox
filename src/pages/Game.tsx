@@ -101,6 +101,32 @@ export const Game = () => {
     function randNum(min: number, max: number) { // min and max included 
       return Math.floor(Math.random() * (max - min + 1) + min)
     }
+    
+    const nextQuestion = () => {
+        const roomId = location.state.roomId;
+        const refe = ref(database, `/rooms/${roomId}`);
+        let question_index = 0      
+        onValue(refe, (snapshot)=>{
+            question_index = snapshot.val().question;
+
+        })
+        question_index = question_index % 21;
+        update(refe, {
+            seconds:30,
+            question: question_index+1,
+            startAt: serverTimestamp()
+        })
+        setShowResponses(false);
+        const quest = ref(database, `/questions/${room?.question}`)
+      onValue(quest, (snapshot) => {
+        if (snapshot.val()) {
+          const newQuestion = snapshot.val()
+          setQuestion(newQuestion.text);
+        }
+      })
+        startTimer()
+
+    }
 
     useEffect(() => {
       const quest = ref(database, `/questions/${room?.question}`)
@@ -119,11 +145,6 @@ export const Game = () => {
         onValue(refe, (snapshot) => {
             console.log(snapshot)
             timerHasStarted = snapshot.val().seconds != 0
-            if (!timerHasStarted){
-                update(refe, {
-                    startAt: serverTimestamp(),
-                    seconds: 30
-                    });}
             startTimer();
                     
                 })
@@ -249,6 +270,8 @@ export const Game = () => {
         <br></br>
         <button className="right-center" onClick={() => {leaveGame()}}>Leave</button>
         </>
+        <h1>{timer}</h1>
+
 
         <div className=".player-card-label">
           {users.map((user, index) => {
@@ -270,10 +293,10 @@ export const Game = () => {
                     <h2>HOST: {room.host}</h2> 
                 </>
                 }       
-                <Question prompt={"What food should you not bring to a potluck."}/>
+                <Question prompt={question}/>
                 
                 <input type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
-                <button onClick={()=>postResponse()}>SUBMIT RESPONSE</button>
+                <button onClick={()=>{postResponse(); setResponse("")}}>SUBMIT RESPONSE</button>
                 <h1>{timer}</h1>
                 <button>START GAME</button> <button onClick={() => {leaveGame()}}>Leave</button>
                 </>
@@ -295,9 +318,9 @@ export const Game = () => {
                     <h2>HOST: {room.host}</h2> 
                 </>
                 }       
-                <Question prompt={"What food should you not bring to a potluck."}/>
+                <Question prompt={question}/>
                 
-                <button>Next Question</button> <button onClick={() => {leaveGame()}}>Leave</button>
+                <button onClick={()=> nextQuestion()}>Next Question</button> <button onClick={() => {leaveGame()}}>Leave</button>
                 </>
                 <div className=".player-card-label">
                   {users.map((user, index) => {
