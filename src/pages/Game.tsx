@@ -327,11 +327,7 @@ export const Game = () => {
                 
                 <button onClick={()=> {nextQuestion(); }}>Next Question</button> <button onClick={() => {leaveGame()}}>Leave</button>
                 </>
-                <div className=".player-card-label">
-                  {users.map((user, index) => {
-                    return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location} points={user.points}/>
-                  })}
-                </div>
+                
                 <div>
                   {users.map((user, index) => {
                     return (
@@ -349,7 +345,13 @@ export const Game = () => {
                       </div>
                     )
                   })}
-                  <button onClick={() => {checkWinner()}}>Check Winner</button>
+                  {/* <button onClick={() => {checkWinner()}}>Check Winner</button> */}
+
+                  <div className=".player-card-label">
+                  {users.map((user, index) => {
+                    return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location} points={user.points}/>
+                  })}
+                </div>
               </div>
                       
 
