@@ -18,6 +18,7 @@ export const Game = () => {
     const [question, setQuestion] = useState("");
     const [responses, setResponses] = useState<string[]>([]);
     const [voted, setVoted] = useState(false)
+    const [winner, setWinner] = useState("");
     let interval:NodeJS.Timer;
     
     const navigate = useNavigate();
@@ -62,6 +63,12 @@ export const Game = () => {
         loop: true,
         config: {duration: 10000},
     }))
+    const [springs4, api4] = useSpring(() => ({     
+      from: { x: 250, y: 40, rotate: 0},
+      to: { x: 1050, rotate: 1000 },
+      loop: true,
+      config: {duration: 5000},
+  }))
     //end spring stuff
 
     useEffect(() => {
@@ -205,7 +212,8 @@ export const Game = () => {
 
     const checkWinner = () => {
       const winner = users.reduce((prev, current) => (prev.points > current.points) ? prev : current)    
-      console.log(winner)
+      console.log(winner.response)
+      setWinner(winner.response);
     }
 
     function postResponse () { 
@@ -230,42 +238,7 @@ export const Game = () => {
             <h2 className="center">HOST: {room.host}</h2> 
           </>
         }       
-        <Question prompt={question}/>
-        <div></div>
-        <div>
-
-        <animated.div
-        //onClick={handleClick}
-        style={{
-          width: 100,
-          height: 100,
-          background: 'red',
-          borderRadius: 8,
-          ...springs2,
-        }}
-      >
-        </animated.div>
-        <animated.div
-        //onClick={handleClick}
-        style={{
-          width: 80,
-          height: 80,
-          background: 'yellow',
-          borderRadius: 8,
-          ...springs,
-        }}>
-        </animated.div>
-      <animated.div
-        //onClick={handleClick}
-        style={{
-          width: 50,
-          height: 50,
-          background: '#66FF99',
-          borderRadius: 8,
-          ...springs2,
-        }}>
-      </animated.div>
-        </div>
+        
         <br></br>
         
         <input className="margin-center" type="text" value={response} onChange={(e)=> {setVoted(false); setResponse(e.target.value)}}/>
@@ -294,16 +267,27 @@ export const Game = () => {
                 <>
                 {room &&
                 <>
-                    <h1>ROOM CODE: {room.roomCode}</h1>
-                    <h2>HOST: {room.host}</h2> 
+                    <h2 className="center">ROOM CODE: {room.roomCode}</h2>
+                    <h2 className="center">HOST: {room.host}</h2> 
                 </>
                 }       
                 <Question prompt={question}/>
                 
-                <input type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
-                <button onClick={()=>{postResponse(); setResponse("")}}>SUBMIT RESPONSE</button>
+                <input className="margin-center" type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
+                <button className="left-center" onClick={()=>{postResponse(); setResponse("")}}>SUBMIT RESPONSE</button>
+                <animated.div
+                    //onClick={handleClick}
+                    style={{
+                      width: 70,
+                      height: 70,
+                      background: 'red',
+                      borderRadius: 8,
+                      ...springs4,
+                    }}
+                  />
                 <h1>{timer}</h1>
-                <button onClick={() => {leaveGame()}}>Leave</button>
+            
+                <button className="margin-center" onClick={() => {leaveGame()}}>Leave</button>
                 </>
                 
         
@@ -315,30 +299,62 @@ export const Game = () => {
     }
     else{
         return(
+            //results of game page
             <main>
                 <>
                 {room &&
                 <>
-                    <h1>ROOM CODE: {room.roomCode}</h1>
-                    <h2>HOST: {room.host}</h2> 
+                    <h2 className="center">ROOM CODE: {room.roomCode}</h2>
+                    <h2 className="center">HOST: {room.host}</h2> 
                 </>
                 }       
                 <Question prompt={question}/>
+
+                  <div>
+                    <animated.div
+                    //onClick={handleClick}
+                    style={{
+                      width: 100,
+                      height: 100,
+                      background: 'red',
+                      borderRadius: 8,
+                      ...springs2,
+                    }}
+                  />
+                    <animated.div
+                    //onClick={handleClick}
+                    style={{
+                      width: 80,
+                      height: 80,
+                      background: 'yellow',
+                      borderRadius: 8,
+                      ...springs,
+                    }}
+                  />
+                  <animated.div
+                    //onClick={handleClick}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      background: '#66FF00',
+                      borderRadius: 8,
+                      ...springs2,
+                    }}
+                  />
+                  </div>
+                <br></br>
                 
-                <button onClick={()=> {nextQuestion(); }}>Next Question</button> <button onClick={() => {leaveGame()}}>Leave</button>
+                <button className="left-center" onClick={()=> {nextQuestion(); }}>Next Question</button> 
+                <br></br>
+                <button className="margin-center" onClick={() => {leaveGame()}}>Leave</button>
                 </>
-                <div className=".player-card-label">
-                  {users.map((user, index) => {
-                    return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location} points={user.points}/>
-                  })}
-                </div>
-                <div>
+                <div className="container">
                   {users.map((user, index) => {
                     return (
                       <div key={index + user.id}>
                         {user.response && 
                           <div>
-                            <p>{user.response}</p>
+                            <h2>{user.response}</h2>
                             {!voted &&
                               <button onClick={(e) => {givePlayerPoint(user)}}>Vote</button>
                             }
@@ -350,7 +366,15 @@ export const Game = () => {
                     )
                   })}
                   <button onClick={() => {checkWinner()}}>Check Winner</button>
+                  <br></br>
               </div>
+              <h2 className="center" >Winner: {winner}</h2>
+              <br></br>
+                <div className=".player-card-label">
+                  {users.map((user, index) => {
+                    return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location} points={user.points}/>
+                  })}
+                </div>
                       
 
             </main>
