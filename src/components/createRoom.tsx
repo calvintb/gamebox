@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { database } from "../firebase_setup/firebase";
-import { equalTo, onValue, orderByChild, push, query, ref } from "firebase/database";
+import { equalTo, onValue, orderByChild, push, query, ref, serverTimestamp } from "firebase/database";
 import { useNavigate } from "react-router-dom";
 import { useSpring, animated } from '@react-spring/web'
 import { Question } from "./Question";
@@ -79,7 +79,7 @@ export const CreateRoom = () => {
           roomCode: roomCode,
           host: host,
           question: 1,
-          startAt: 0,
+          startAt: serverTimestamp(),
           seconds: 0,
         };
         const result = await push(roomRef, room);
