@@ -92,7 +92,7 @@ export const SignUp = () => {
                 id: auth.currentUser?.uid,
                 location: `${locationData.city}, ${locationData.principalSubdivision} ${locationData.countryCode}`,
                 response: "",
-                points: 0 
+                points: 0,
             });
             
         }    

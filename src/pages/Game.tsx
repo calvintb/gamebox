@@ -197,7 +197,9 @@ export const Game = () => {
       update(userRef, {
         points: player.points + 1
       })
+
       setVoted(true)
+
     }
 
     const checkWinner = () => {
@@ -275,7 +277,7 @@ export const Game = () => {
 
         <div className=".player-card-label">
           {users.map((user, index) => {
-          return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location}/>
+          return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location} points={user.points}/>
           })}
         </div>
 
@@ -320,11 +322,11 @@ export const Game = () => {
                 }       
                 <Question prompt={question}/>
                 
-                <button onClick={()=> nextQuestion()}>Next Question</button> <button onClick={() => {leaveGame()}}>Leave</button>
+                <button onClick={()=> {setVoted(false); nextQuestion(); }}>Next Question</button> <button onClick={() => {leaveGame()}}>Leave</button>
                 </>
                 <div className=".player-card-label">
                   {users.map((user, index) => {
-                    return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location}/>
+                    return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location} points={user.points}/>
                   })}
                 </div>
                 <div>
