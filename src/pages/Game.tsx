@@ -17,6 +17,7 @@ export const Game = () => {
     const [response, setResponse] = useState("");
     const [question, setQuestion] = useState("");
     const [responses, setResponses] = useState<string[]>([]);
+    const [voted, setVoted] = useState(false)
     let interval:NodeJS.Timer;
     
     const navigate = useNavigate();
@@ -168,12 +169,26 @@ export const Game = () => {
       navigate('/')
     }
 
+    const givePlayerPoint = (player:User) => {
+      console.log(player.name + " got a point!")
+      
+      const userRef = ref(database, `/rooms/${location.state.roomId}/users/${player.name}`)
+      update(userRef, {
+        points: player.points + 1
+      })
+      setVoted(true)
+    }
+
+    const checkWinner = () => {
+      const winner = users.reduce((prev, current) => (prev.points > current.points) ? prev : current)    
+      console.log(winner)
+    }
+
     function postResponse () { 
         if(response) {
-            const keys = Object.keys(response)
             const userRef = ref(database, `/rooms/${location.state.roomId}/users/${location.state.user}`);
             const user = {
-                response
+                response: response
             };
             update(userRef, user); 
         }    
@@ -284,14 +299,31 @@ export const Game = () => {
                 
                 <button>Next Question</button> <button onClick={() => {leaveGame()}}>Leave</button>
                 </>
-                {responses.map((response, index) => {
-                return <ResponseCard key={index + response.username} answer={response.response} username={response.username}/>
-                })}
-
                 <div className=".player-card-label">
-                
+                  {users.map((user, index) => {
+                    return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location}/>
+                  })}
                 </div>
-                
+                <div>
+                  {users.map((user, index) => {
+                    return (
+                      <div key={index + user.id}>
+                        {user.response && 
+                          <div>
+                            <p>{user.response}</p>
+                            {!voted &&
+                              <button onClick={(e) => {givePlayerPoint(user)}}>Vote</button>
+                            }
+                            
+                          </div>
+                        }
+                    
+                      </div>
+                    )
+                  })}
+                  <button onClick={() => {checkWinner()}}>Check Winner</button>
+              </div>
+                      
 
             </main>
         );
