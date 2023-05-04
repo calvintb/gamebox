@@ -6,8 +6,6 @@ import { auth, createAccount, database } from "../firebase_setup/firebase";
 import { equalTo, get, onValue, orderByChild, orderByKey, push, query, ref, remove, update, serverTimestamp } from "firebase/database";
 import { ResponseCard } from "../components/ResponseCard";
 import { useLocation, useNavigate } from "react-router-dom";
-import { auth, database } from "../firebase_setup/firebase";
-import { equalTo, get, getDatabase, onValue, orderByChild, orderByKey, query, ref, remove } from "firebase/database";
 import {User, Room, Questions} from "../lib/types"
 import { useSpring, animated } from '@react-spring/web'
 
@@ -181,30 +179,7 @@ export const Game = () => {
         }    
                
     };
-    if (hasStarted && !showResponses){
-        return (
-            <main>
-                <>
-                {room &&
-                <>
-                    <h1>ROOM CODE: {room.roomCode}</h1>
-                    <h2>HOST: {room.host}</h2> 
-                </>
-                }       
-                <Question prompt={"What food should you not bring to a potluck."}/>
-                
-                <input type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
-                <button onClick={()=>postResponse()}>SUBMIT RESPONSE</button>
-                <h1>{timer}</h1>
-                <button>START GAME</button> <button onClick={() => {leaveGame()}}>Leave</button>
-                </>
-                
-
-                <div className=".player-card-label">
-                
-                </div>
-                
-
+    if (!hasStarted && !showResponses){
     return(
       <main>
         <>
@@ -254,9 +229,7 @@ export const Game = () => {
         
         <input className="margin-center" type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
         <button className="left-center">SUBMIT RESPONSE</button>
-        <Timer timer={timer} update={setTimer}/>
-
-        <button className="margin-center">START GAME</button> 
+        <button className="margin-center" onClick={()=>setHasStarted(true)}>START GAME</button> 
         <br></br>
         <br></br>
         <button className="right-center" onClick={() => {leaveGame()}}>Leave</button>
@@ -272,7 +245,32 @@ export const Game = () => {
             </main>
 
     )}
-    else if (showResponses){
+    else if (!showResponses){
+        return (
+            <main>
+                <>
+                {room &&
+                <>
+                    <h1>ROOM CODE: {room.roomCode}</h1>
+                    <h2>HOST: {room.host}</h2> 
+                </>
+                }       
+                <Question prompt={"What food should you not bring to a potluck."}/>
+                
+                <input type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
+                <button onClick={()=>postResponse()}>SUBMIT RESPONSE</button>
+                <h1>{timer}</h1>
+                <button>START GAME</button> <button onClick={() => {leaveGame()}}>Leave</button>
+                </>
+                
+        
+                <div className=".player-card-label">
+                
+                </div>
+            </main>
+                )
+    }
+    else{
         return(
             <main>
                 <>
@@ -298,20 +296,7 @@ export const Game = () => {
             </main>
         );
     }
-    else{
-        return(
-            <>        
-                    {room &&
-                    <>
-                        <h1>ROOM CODE: {room.roomCode}</h1>
-                        <h2>HOST: {room.host}</h2> 
-                    </>
-                    }  
-            {users.map((user, index) => {
-                    return <PlayerCard key={index + user.name} name={user.name} geolocation={user.location}/>
-                    })}
-            <button onClick={()=>setHasStarted(true)}>START GAME</button>
-            </>
-        );
-    }
 }
+
+
+
