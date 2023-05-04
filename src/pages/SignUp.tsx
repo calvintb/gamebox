@@ -107,7 +107,7 @@ export const SignUp = () => {
             if(snapshot.val()){
                 navigate('/game', {state: {roomId: roomId, user: username}})
             }else {
-                setError("Not a valid room")
+                setError("invalid room number or username doesn't exist")
             }
         })
     }
@@ -241,11 +241,11 @@ export const SignUp = () => {
                 <>
                 <h2 className="center">{error}</h2>
                 <form className="center" onSubmit={(e)=>{e.preventDefault(); addUser(); createAnonymousAccount();}}>
-                    <input value={password} onChange={(e)=>setPassword(e.target.value)}/>
-                    <input value={username} onChange={(e)=>setUsername(e.target.value)}/>
+                    <input placeholder={"room code"} value={password} onChange={(e)=>setPassword(e.target.value)}/>
+                    <input placeholder={"username"} value={username} onChange={(e)=>setUsername(e.target.value)}/>
                     <button onClick={() => {}}type="submit">Join</button>
                 </form>
-                <div className="left-center">
+                <div className="center">
                   <h2>Room Code</h2>
                   <h2 className="left-pad"> Username</h2>
                 </div>
@@ -257,8 +257,8 @@ export const SignUp = () => {
                 <h2 className="center">Got kicked out? No worries! Just enter the room code & your username again below:</h2>
                 <h2 className="center">{error}</h2>
                  <form className="center" onSubmit={(e)=>{e.preventDefault(); loginUserAgain();}}>
-                    <input value={password} onChange={(e)=>setPassword(e.target.value)}/>
-                    <input value={username} onChange={(e)=>setUsername(e.target.value)}/>
+                    <input placeholder={"room code"} value={password} onChange={(e)=>setPassword(e.target.value)}/>
+                    <input placeholder={"username"} value={username} onChange={(e)=>setUsername(e.target.value)}/>
                     <button onClick={() => {}}type="submit">Join</button>  
                 </form>
                 <br></br>
