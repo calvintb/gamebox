@@ -3,6 +3,7 @@ export type User = {
     name: string,
     location: string,
     response: string,
+    points: number,
 }
 
 export type Location = {

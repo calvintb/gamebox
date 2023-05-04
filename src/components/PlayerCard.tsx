@@ -1,11 +1,12 @@
 interface PlayerCardProps {
   name: string;
   geolocation: string;
+  points: number;
 }
 
 const name = 'name goes here'
 
-export const PlayerCard = ({name, geolocation}: PlayerCardProps) => {
+export const PlayerCard = ({name, geolocation, points}: PlayerCardProps) => {
   return (
     <div>
       <div className="player-card-title">
@@ -18,6 +19,9 @@ export const PlayerCard = ({name, geolocation}: PlayerCardProps) => {
       </div>
       <div className="player-card-main"> 
         Location: {geolocation}
+      </div>
+      <div className="player-card-main">
+        Points: {points}
       </div>
     </div>
   );

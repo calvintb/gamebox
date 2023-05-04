@@ -91,7 +91,8 @@ export const SignUp = () => {
                 name: username,
                 id: auth.currentUser?.uid,
                 location: `${locationData.city}, ${locationData.principalSubdivision} ${locationData.countryCode}`,
-                response: "" 
+                response: "",
+                points: 0,
             });
             
         }    
