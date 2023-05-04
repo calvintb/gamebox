@@ -147,8 +147,9 @@ export const Game = () => {
             timerHasStarted = snapshot.val().seconds != 0
             startTimer();
                     
-                })
+          })
     }, []);
+
     
     const startTimer = ()=>{
         const serverTimeOffset = serverTimestamp();
@@ -214,9 +215,11 @@ export const Game = () => {
                 response: response
             };
             update(userRef, user); 
-        }    
-               
+            
+        }  
+        setVoted(false)           
     };
+
     if (!hasStarted && !showResponses){
     return(
       <main>
@@ -265,7 +268,7 @@ export const Game = () => {
         </div>
         <br></br>
         
-        <input className="margin-center" type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
+        <input className="margin-center" type="text" value={response} onChange={(e)=> {setVoted(false); setResponse(e.target.value)}}/>
         <button className="left-center">SUBMIT RESPONSE</button>
         <button className="margin-center" onClick={()=>setHasStarted(true)}>START GAME</button> 
         <br></br>
@@ -322,7 +325,7 @@ export const Game = () => {
                 }       
                 <Question prompt={question}/>
                 
-                <button onClick={()=> {setVoted(false); nextQuestion(); }}>Next Question</button> <button onClick={() => {leaveGame()}}>Leave</button>
+                <button onClick={()=> {nextQuestion(); }}>Next Question</button> <button onClick={() => {leaveGame()}}>Leave</button>
                 </>
                 <div className=".player-card-label">
                   {users.map((user, index) => {
