@@ -303,7 +303,7 @@ export const Game = () => {
                 <input type="text" value={response} onChange={(e)=>setResponse(e.target.value)}/>
                 <button onClick={()=>{postResponse(); setResponse("")}}>SUBMIT RESPONSE</button>
                 <h1>{timer}</h1>
-                <button>START GAME</button> <button onClick={() => {leaveGame()}}>Leave</button>
+                <button onClick={() => {leaveGame()}}>Leave</button>
                 </>
                 
         
